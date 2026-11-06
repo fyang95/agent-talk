@@ -1,0 +1,32 @@
+# Documentation only. Nothing in agent-talk executes this file.
+# Order: planner (claude), builder (cursor), verifier (claude, fresh
+# context), publisher (draft pull request only, a human merges).
+# Each step reads its input artifact file and writes its output artifact
+# file. It does not read the previous chat.
+name: pipeline-sequential
+steps:
+  - name: planner
+    agent: planner
+    harness: claude
+    input: brief.md
+    output: plan.md
+    does: Write the implementation plan from the brief.
+  - name: builder
+    agent: builder
+    harness: cursor
+    input: plan.md
+    output: build.md
+    does: Implement the plan. Record the diff, the tests run, and what was not verified.
+  - name: verifier
+    agent: verifier
+    harness: claude
+    fresh_context: true
+    input: build.md
+    output: verdict.md
+    does: Check the evidence. A done with no artifacts is blocked.
+  - name: publisher
+    agent: publisher
+    harness: cursor
+    input: verdict.md
+    output: pr-draft.md
+    does: Open a draft pull request only. A human merges.
