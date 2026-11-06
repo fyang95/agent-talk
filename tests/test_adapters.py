@@ -39,12 +39,14 @@ def test_force_flag_is_added_only_when_requested() -> None:
         assert adapter.force_flag in adapter.argv("hello", force=True)
 
 
-def test_claude_has_no_status_command() -> None:
+def test_installed_claude_has_no_status_command(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("agent_talk.adapters.base.shutil.which", lambda name: f"/bin/{name}")
     assert CLAUDE.status() == "unknown (no status command)"
 
 
 def test_missing_binary_reports_not_installed(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("agent_talk.adapters.base.shutil.which", lambda _name: None)
+    assert CLAUDE.status() == "not installed"
     assert CURSOR.status() == "not installed"
     assert CODEX.status() == "not installed"
 

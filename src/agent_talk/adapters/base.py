@@ -45,10 +45,10 @@ class Adapter:
         )
 
     def status(self) -> str:
-        if self.status_argv is None:
-            return "unknown (no status command)"
         if self.detect() is None:
             return "not installed"
+        if self.status_argv is None:
+            return "unknown (no status command)"
         try:
             proc = subprocess.run(
                 [self.binary, *self.status_argv],
